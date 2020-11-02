@@ -2,7 +2,8 @@
 const {messageEmbed} = require('discord.js');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
+const winston = require('winston');
+ 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
   client.user.setPresence({ activity: { name: 'Happy Day' }, status: 'idle' })
@@ -42,5 +43,20 @@ client.on('message', msg => {
     channel.send('', {file: ["welcome.jpg"]});
   });
   
+const logger = winston.createLogger({
+	transports: [
+		new winston.transports.Console(),
+		new winston.transports.File({ filename: 'log' }),
+	],
+	format: winston.format.printf(log => `[${log.level.toUpperCase()}] - ${log.message}`),
+});
+
+client.on('ready', () => logger.log('info', 'The bot is online!'));
+client.on('debug', m => logger.log('debug', m));
+client.on('warn', m => logger.log('warn', m));
+client.on('error', m => logger.log('error', m));
+
+process.on('uncaughtException', error => logger.log('error', error));
  
+
 client.login('')
